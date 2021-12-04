@@ -181,7 +181,9 @@ You can confirm successful transactions using this API.
     confirmations    : BOOL,
     ticker           : STRING,
     txid             : STRING,
-    amount           : FLOAT,
+    amount           : STRING,
+    amount_final     : STRING,
+    fee              : STRING,
     date             : INT,
 }
 ```
