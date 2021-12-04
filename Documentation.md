@@ -179,7 +179,7 @@ You can confirm successful transactions using this API.
     in_wallet        : STRING,
     out_wallet       : STRING,
     confirmations    : BOOL,
-    coin             : STRING,
+    ticker           : STRING,
     txid             : STRING,
     amount           : FLOAT,
     date             : INT,
