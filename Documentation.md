@@ -11,6 +11,7 @@ Zanjir is a cryptocurrency payment gateway service for your online store.
 * Online technical support
 * Security in payment and settlement
 * Supports all popular cryptocurrencies
+* White label service (Use it as your own)
 
 
 ## How does it work?
@@ -83,6 +84,8 @@ If the payment is made successfully by the customer, Zanjir will send a web hook
 Payment information will be sent to you by POST method.
 
 :warning:	&nbsp; Zanjir will send payment information to you when payment has been made successfully and at least one block is passed since that payment.
+
+:warning:	&nbsp; In case of getting an error while calling the callback, Zanjir will try to continue calling the callback for **2 hours** until getting a status 200 response. After that, Zanjir will stop calling the callback.
 
 
 Zanjir will call your callback address with these parameters which are listed below.
