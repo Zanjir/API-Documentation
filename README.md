@@ -27,20 +27,18 @@ Use this API to create payment requests. Request parameters are listed below.
 ##### 1) Ticker 
 This **required** parameter represents the coin you want your customer to pay in. You can find the complete list of supported coins and their minimum value down below. Simply pass the coin name (Ticker).
 
-| Ticker   |      Coin/Token      |  Blockchin |  Min Amount |
-|----------|:-------------:|:------:|:------:|
-| btc_bitcoin |  BTC | Bitcoin |  0.001 |
-| ltc_litecoin |    LTC   |   Litcoin |0.01 |
-| xlm_stellar | XLM |    Stellar |3 |
-| trx_trc20 | TRX |    TRC20 | 10 |
-| dash_dashcoin | DASH |    Dashcoin |0.01 |
-| doge_dogecoin | DOGE |    Dogecoin |7 |
-| usdt_trc20 | USDT |    TRC20 |1 |
-| bnb_bep20 | BNB |    BEP20 |0.01 |
-| usdt_bep20 | USDT |    BEP20 |1 |
-| busd_bep20 | BUSD |    BEP20 |1 |
-| dai_bep20 | DAI |    BEP20 |1 |
-| bnb_bep20_testnet | BNB |    BEP20_testnet |0.01 |
+| Ticker   |      Coin/Token      |    Blockchin    | Min Amount |
+|----------|:-------------:|:---------------:|:----------:|
+| btc_bitcoin |  BTC |     Bitcoin     |   0.001    |
+| ltc_litecoin |    LTC   |     Litcoin     |    0.01    |
+| trx_trc20 | TRX |      TRC20      |     10     |
+| dash_dashcoin | DASH |    Dashcoin     |    0.01    |
+| doge_dogecoin | DOGE |    Dogecoin     |     7      |
+| usdt_trc20 | USDT |      TRC20      |     2      |
+| bnb_bep20 | BNB |      BEP20      |    0.01    |
+| busd_bep20 | BUSD |      BEP20      |     1      |
+| bnb_bep20_testnet | BNB |  BEP20_testnet  |    0.01    |
+| btc_bitcoin_testnet | BTC | Bitcoin_testnet |   0.001    |
 
 ##### 3) Amount
 This **required** parameter represents the amount you expect your customer to pay. Minimum amount of each coin is mentioned in [Tickers](#1-Ticker) table.
@@ -50,9 +48,11 @@ This **optional** parameter represents your currency of choice. This helpful par
 For example, if you want the customer to pay 10 USD in bitcoins, you can simply specify these three parameters as below:
 ```gherkin=
 {
+    address: '18XBGgoZ8zgVG6....'
     ticker: 'btc_bitcoin',
     amount: 10,
     currency: 'USD',
+    callback: 'https://mysite.com/'
     ... other parameters,
 }
 ```
@@ -85,27 +85,29 @@ Payment information will be sent to you by POST method.
 
 :warning:	&nbsp; Zanjir will send payment information to you when payment has been made successfully and at least one block is passed since that payment.
 
-:warning:	&nbsp; In case of getting an error while calling the callback, Zanjir will try to continue calling the callback for **2 hours** until getting a status 200 response. After that, Zanjir will stop calling the callback.
+:warning:	&nbsp; In case of getting an error while calling the callback, Zanjir will try to continue calling the callback for **1 hours** until getting a status 200 response. After that, Zanjir will stop calling the callback.
 
 
 Zanjir will call your callback address with these parameters which are listed below.
 
-|  Parameter  |      Description      |
-|----------|:-------------:|
-| amount_final |  The final amount deposited into your wallet with a fee deduction |
-| amount |  amount_final + fee  |
-| txid |  A txid or Transaction ID is a string of letters and numbers that identifies a specific transaction on the blockchain |
-| in_wallet |  temporary wallet Zanjir for which your customer has deposited the amount. |
-| out_wallet |  The address of your wallet to which we deposited the amount. |
-| ticker |  Ticker name |
-| fee |  The sum of service fee Zanjir and network fee, which is deducted from the principal amount. |
-| nonce |  nonce is a random string , that you validate when you receive our request, to make sure the request is coming from us. |
+| Parameter              |                                                      Description                                                       |
+|------------------------|:----------------------------------------------------------------------------------------------------------------------:|
+| id                     |                                                 Zanjir Transaction Id                                                  |
+| amount_final           |                            The final amount deposited into your wallet with a fee deduction                            |
+| amount                 |                                                   amount_final + fee                                                   |
+| fee                    |                                                Zanjir fee + Network fee                                                |
+| in_wallet              |                       temporary wallet Zanjir for which your customer has deposited the amount.                        |
+| out_wallet             |                              The address of your wallet to which we deposited the amount.                              |
+| ticker                 |                                                      Ticker name                                                       |
+| in_transaction_confirm |           It confirms that your customer's transaction has been settled in the in_wallet.                  |
+| date                   | Date of payment request submitted|
+| nonce                  | nonce is a random string , that you validate when you receive our request, to make sure the request is coming from us. |
 ##### Secret
 This parameter is for VIP customers.
 
 ---
 ##### Request Information
-**Request URL:** https://api.zanjir.network/create
+**Request URL:** https://gate.zanjir.network/api/create
 **Request Method:** **POST**
 **Request Schema:**
 ```gherkin=
@@ -117,12 +119,11 @@ This parameter is for VIP customers.
     currency  : STRING(Optional),
     secret    : STRING(Optional),
 }
-
  ```
 **Response Schema:**
 ```gherkin=
-
 {
+    id            : STRING,
     status        : INT,
     ticker        : STRING,
     amount        : STRING,
@@ -133,6 +134,8 @@ This parameter is for VIP customers.
 
 ##### Response Information
 
+###### id
+For each transaction, a unique ID is created in UUID format.
 ###### status
 Represents the result of request. List of all possible values and their description is listed below.
 
@@ -166,28 +169,32 @@ nonce is validation string (a random string), that you can use to validate your 
 ---
 
 
-### How to verify transactions? (Logs)
+### How to verify transactions? 
 You can confirm successful transactions using this API.
 
-**URL:** https://api.zanjir.network/logs/
+**URL:** https://gate.zanjir.network/api/verify/
 **Method:** GET
 **Parameters:**
+
 | Parameter | Description                     |
-| --------- | ------------------------------- |
-| in_wallet | Address of the temporary wallet |
+|----------|:-------------:|
+| id | Zanjir Transaction Id (UUID) |
+
 
 **Response Schema:**
 ```gherkin=
 {
-    in_wallet        : STRING,
-    out_wallet       : STRING,
-    confirmations    : BOOL,
-    ticker           : STRING,
-    txid             : STRING,
-    amount           : STRING,
-    amount_final     : STRING,
-    fee              : STRING,
-    date             : INT,
+    id                          : STRING,
+    in_wallet                   : STRING,
+    out_wallet                  : STRING,
+    in_transaction_confirm      : BOOL,
+    out_transaction_confirm     : BOOL,
+    ticker                      : STRING,
+    out_txid                    : STRING,
+    callback_status             : STRING
+    amount                      : STRING,
+    fee                         : STRING,
+    date                        : INT,
 }
 ```
 
@@ -196,7 +203,7 @@ You can confirm successful transactions using this API.
 ### Important Notes 
 
 * If payment is successful, the callback address will be called.
-* We recommend using the Logs API in order to make sure that the payment is successful.
+* We recommend using the Verify API in order to make sure that the payment is successful.
 * The callback will be called after at least one confirmation block.
 * Zanjir service fee is fixed at 1%.
 * The network fee will be calculated on each payment, but we use higher than usual fees to increase the security and speed of payment confirmation in the blockchain network.
